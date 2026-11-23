@@ -11,13 +11,15 @@ import SwiftData
 struct DocumentEditorView: View {
     let application: JobApplication
     let layout: EditorLayout
+    let editor: EditorController
 
     @State private var draft: String
     @State private var previewHTML: String
 
-    init(application: JobApplication, layout: EditorLayout) {
+    init(application: JobApplication, layout: EditorLayout, editor: EditorController) {
         self.application = application
         self.layout = layout
+        self.editor = editor
         let html = application.htmlContent ?? ""
         _draft = State(initialValue: html)
         _previewHTML = State(initialValue: html)
@@ -26,8 +28,12 @@ struct DocumentEditorView: View {
     var body: some View {
         HSplitView {
             if layout.showsEditor {
-                CodeTextView(text: $draft)
-                    .frame(minWidth: 280, maxWidth: .infinity, maxHeight: .infinity)
+                VStack(spacing: 0) {
+                    CodeEditorView(text: $draft, controller: editor)
+                    Divider()
+                    EditorStatusBar(controller: editor)
+                }
+                .frame(minWidth: 320, maxWidth: .infinity, maxHeight: .infinity)
             }
             if layout.showsPreview {
                 HTMLPreviewView(html: previewHTML)

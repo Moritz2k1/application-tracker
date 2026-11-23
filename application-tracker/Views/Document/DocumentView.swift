@@ -15,6 +15,7 @@ struct DocumentView: View {
     @State private var isConfirmingRemove = false
     @State private var pendingDocument: HTMLImporter.ImportedDocument?
     @State private var errorMessage: String?
+    @State private var editor = EditorController()
 
     var body: some View {
         content
@@ -47,7 +48,7 @@ struct DocumentView: View {
     @ViewBuilder
     private var content: some View {
         if application.hasDocument {
-            DocumentEditorView(application: application, layout: layout)
+            DocumentEditorView(application: application, layout: layout, editor: editor)
         } else {
             ContentUnavailableView {
                 Label("No document yet", systemImage: "doc.badge.plus")
@@ -81,6 +82,14 @@ struct DocumentView: View {
         }
 
         ToolbarItemGroup {
+            Button {
+                editor.format()
+            } label: {
+                Label("Format", systemImage: "text.alignleft")
+            }
+            .disabled(!application.hasDocument || !layout.showsEditor || !editor.isReady)
+            .help("Format with Prettier (⇧⌥F in the editor)")
+            
             Button {
                 importFile()
             } label: {
