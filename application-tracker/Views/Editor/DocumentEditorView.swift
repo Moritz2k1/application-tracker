@@ -6,6 +6,7 @@ struct DocumentEditorView<Document: EditableDocument>: View {
     let layout: EditorLayout
     let editor: EditorController
 
+    @Environment(\.modelContext) private var modelContext
     @State private var draft: String
     @State private var previewHTML: String
 
@@ -55,6 +56,11 @@ struct DocumentEditorView<Document: EditableDocument>: View {
         guard !document.isDeleted,
               document.htmlContent != nil,
               document.htmlContent != draft else { return }
+
+        let undoManager = modelContext.undoManager
+        undoManager?.disableUndoRegistration()
         document.updateContent(draft)
+        modelContext.processPendingChanges()
+        undoManager?.enableUndoRegistration()
     }
 }
