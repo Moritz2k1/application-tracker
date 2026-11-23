@@ -3,6 +3,7 @@ import SwiftData
 
 enum WindowID {
     static let document = "document"
+    static let cv = "cv"
 }
 
 @main
@@ -38,6 +39,22 @@ struct ApplicationTrackerApp: App {
                     )
                 } else {
                     ContentUnavailableView("No application selected", systemImage: "doc")
+                }
+            }
+            .frame(minWidth: 600, minHeight: 500)
+            .modelContainer(modelContainer)
+        }
+        .defaultSize(width: 1000, height: 800)
+
+        WindowGroup("CV", id: WindowID.cv, for: PersistentIdentifier.self) { $versionID in
+            Group {
+                if let versionID {
+                    DocumentWindowView<CVVersion>(
+                        documentID: versionID,
+                        notFoundTitle: "CV version not found"
+                    )
+                } else {
+                    ContentUnavailableView("No CV selected", systemImage: "person.text.rectangle")
                 }
             }
             .frame(minWidth: 600, minHeight: 500)

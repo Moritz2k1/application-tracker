@@ -6,18 +6,27 @@ struct ContentView: View {
     @Environment(\.undoManager) private var undoManager
 
     @Query private var allApplications: [JobApplication]
-    @State private var selectedYear: Int? = Calendar.current.currentYear
+    @Query private var allCVs: [CurriculumVitae]
+    @State private var selection: SidebarItem? = .year(Calendar.current.currentYear)
 
     var body: some View {
         let counts = Dictionary(grouping: allApplications, by: \.year).mapValues(\.count)
 
         NavigationSplitView {
-            YearSidebarView(years: years(from: counts), counts: counts, selection: $selectedYear)
+            YearSidebarView(
+                years: years(from: counts),
+                counts: counts,
+                cvCount: allCVs.count,
+                selection: $selection
+            )
         } detail: {
-            if let year = selectedYear {
+            switch selection {
+            case .year(let year):
                 ApplicationTableView(year: year)
                     .id(year)
-            } else {
+            case .cvs:
+                CVLibraryView()
+            case nil:
                 ContentUnavailableView("Select a year", systemImage: "calendar")
             }
         }
