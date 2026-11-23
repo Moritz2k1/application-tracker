@@ -11,6 +11,7 @@ import SwiftData
 struct DocumentView: View {
     let application: JobApplication
 
+    @AppStorage("editorLayout") private var layout: EditorLayout = .split
     @State private var isConfirmingRemove = false
     @State private var pendingDocument: HTMLImporter.ImportedDocument?
     @State private var errorMessage: String?
@@ -45,14 +46,15 @@ struct DocumentView: View {
 
     @ViewBuilder
     private var content: some View {
-        if let html = application.htmlContent {
-            HTMLPreviewView(html: html)
+        if application.hasDocument {
+            DocumentEditorView(application: application, layout: layout)
         } else {
             ContentUnavailableView {
                 Label("No document yet", systemImage: "doc.badge.plus")
             } description: {
-                Text("Import an HTML file, or drop one here.")
+                Text("Start from a blank template, import an HTML file, or drop one here.")
             } actions: {
+                Button("New Document") { createBlankDocument() }
                 Button("Import HTML…") { importFile() }
             }
             .dropDestination(for: URL.self) { urls, _ in
@@ -65,6 +67,19 @@ struct DocumentView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        ToolbarItem {
+            Picker("Layout", selection: $layout) {
+                ForEach(EditorLayout.allCases) { option in
+                    Label(option.label, systemImage: option.systemImage)
+                        .tag(option)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelStyle(.iconOnly)
+            .disabled(!application.hasDocument)
+            .help("Editor, editor and preview, or preview only")
+        }
+
         ToolbarItemGroup {
             Button {
                 importFile()
@@ -90,6 +105,13 @@ struct DocumentView: View {
             .disabled(!application.hasDocument)
             .help("Remove the HTML from this application")
         }
+    }
+
+    private func createBlankDocument() {
+        application.attachDocument(
+            content: HTMLTemplate.blank(company: application.company, jobTitle: application.jobTitle),
+            fileName: HTMLTemplate.fileName(for: application.company)
+        )
     }
 
     private func importFile() {
