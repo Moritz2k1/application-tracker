@@ -16,6 +16,7 @@ struct DocumentView: View {
     @State private var pendingDocument: HTMLImporter.ImportedDocument?
     @State private var errorMessage: String?
     @State private var editor = EditorController()
+    @State private var isExportingPDF = false
 
     var body: some View {
         content
@@ -105,6 +106,20 @@ struct DocumentView: View {
             }
             .disabled(!application.hasDocument)
             .help("Show the page in your default browser")
+            
+            Button {
+                exportPDF()
+            } label: {
+                if isExportingPDF {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Label("Export PDF", systemImage: "arrow.down.doc")
+                }
+            }
+            .disabled(!application.hasDocument || isExportingPDF)
+            .keyboardShortcut("e", modifiers: [.command, .shift])
+            .help("Export as A4 PDF (⇧⌘E)")
 
             Button(role: .destructive) {
                 isConfirmingRemove = true
@@ -148,6 +163,28 @@ struct DocumentView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+    
+    private func exportPDF() {
+        guard let html = application.htmlContent,
+              let url = PDFSavePanel.chooseDestination(suggestedName: pdfFileName) else { return }
+
+        isExportingPDF = true
+        Task {
+            defer { isExportingPDF = false }
+            do {
+                let exporter = PDFExporter()
+                try await exporter.export(html: html, to: url)
+                NSWorkspace.shared.open(url)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private var pdfFileName: String {
+        let source = application.htmlFileName ?? HTMLTemplate.fileName(for: application.company)
+        return URL(fileURLWithPath: source).deletingPathExtension().lastPathComponent + ".pdf"
     }
 
     private var isConfirmingReplace: Binding<Bool> {
