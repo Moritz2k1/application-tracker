@@ -123,7 +123,19 @@ const view = new EditorView({
       lintGutter(),
       htmlLinter,
       themeCompartment.of(themeFor(darkQuery.matches)),
-      Prec.high(keymap.of([indentWithTab])),
+      Prec.high(
+        keymap.of([
+          indentWithTab,
+          {
+            key: "Mod-s",
+            preventDefault: true,
+            run: () => {
+              formatDocument();
+              return true;
+            }
+          }
+        ])
+      ),
       Prec.highest(
         EditorView.domEventHandlers({
           keydown(event) {
