@@ -26,6 +26,26 @@
       font-family: ui-monospace, "SF Mono", Menlo, monospace;
       line-height: 1.5;
     }
+    @media (prefers-color-scheme: light) {
+      #editor .cm-editor .cm-cursor {
+        border-left: 2px solid #1E4FD8;
+      }
+      #editor .cm-editor .cm-activeLine {
+        background: rgba(30, 79, 216, 0.05);
+      }
+      #editor .cm-editor .cm-gutters {
+        background: #F7F8FA;
+        border-right: 1px solid #E6E9F0;
+        color: #8A94A6;
+      }
+      #editor .cm-editor .cm-activeLineGutter {
+        background: rgba(30, 79, 216, 0.08);
+        color: #1E4FD8;
+      }
+      #editor .cm-editor .cm-selectionLayer .cm-selectionBackground {
+        background: rgba(79, 168, 255, 0.28);
+      }
+    }
   </style>
 </head>
 <body>
