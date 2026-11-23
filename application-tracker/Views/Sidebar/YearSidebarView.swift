@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 enum SidebarItem: Hashable {
     case year(Int)
@@ -38,8 +37,9 @@ struct YearSidebarView: View {
 private struct SidebarHeader: View {
     var body: some View {
         HStack(spacing: 10) {
-            Image(nsImage: NSApp.applicationIconImage)
+            Image(.appLogo)
                 .resizable()
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .frame(width: 34, height: 34)
                 .shadow(color: .brandDeep.opacity(0.25), radius: 4, y: 2)
 
