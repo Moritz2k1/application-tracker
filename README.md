@@ -6,6 +6,7 @@ A small macOS app to keep track of your job applications, and the HTML cover let
 
 - **One tab per year:** the sidebar lists every year you applied in. Each year shows a table of applications with company, job title, date, status and attached document.
 - **One HTML document per application:** start from a blank template or import an existing HTML file. Edit it in a built-in code editor with syntax highlighting, linting and formatting.
+- **A CV library:** keep your CVs in their own tab, each with as many versions as you need.
 - **Live preview:** see how the page will look while you type, open it in your browser, or export it as an A4 PDF.
 - **Everything stays local:** all data is stored on your Mac. There is no account, cloud or tracking.
 
@@ -33,6 +34,13 @@ Requires macOS 27.2 or later.
 - **Format** (⇧⌥F) tidies the HTML with Prettier. The status bar shows lint errors and warnings.
 - Changes are saved automatically.
 
+### Manage CVs
+
+- Select **CVs** in the sidebar and click **+** to create a CV, e.g. "Software Developer CV".
+- Every CV has versions. Select a version and click **New Version** to duplicate it, including its images, then edit the copy without touching the original.
+- Double-click a version to edit it in the same editor as application documents.
+- Right-click a version or a CV to rename or delete it.
+
 ### Images
 
 Images are stored inside the app together with the document:
@@ -44,7 +52,3 @@ Images are stored inside the app together with the document:
 
 - **Open in Browser** shows the page in your default browser.
 - **Export PDF** (⇧⌘E) saves the document as an A4 PDF.
-
-## Building from source
-
-Requires Xcode and [Node.js](https://nodejs.org) (e.g. `brew install node`). Open `application-tracker.xcodeproj` and run. The editor in `editor-web/` (CodeMirror, Prettier, HTMLHint) is built automatically by a build phase.
