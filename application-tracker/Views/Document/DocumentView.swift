@@ -44,12 +44,13 @@ struct DocumentView<Document: EditableDocument>: View {
         if document.hasDocument {
             DocumentEditorView(document: document, layout: layout, editor: editor)
         } else {
-            ContentUnavailableView {
-                Label("No document yet", systemImage: "doc.badge.plus")
-            } description: {
-                Text("Start from a blank template, import an HTML file with its images, or drop them here.")
-            } actions: {
+            BrandEmptyState(
+                title: "No document yet",
+                message: "Start from a blank template, import an HTML file with its images, or drop them here.",
+                systemImage: "doc.badge.plus"
+            ) {
                 Button("New Document") { document.createBlankDocument() }
+                    .buttonStyle(.borderedProminent)
                 Button("Import HTML…") { importFiles() }
             }
             .dropDestination(for: URL.self) { urls, _ in

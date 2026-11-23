@@ -52,13 +52,15 @@ struct CVLibraryView: View {
         }
         .overlay {
             if cvs.isEmpty {
-                ContentUnavailableView {
-                    Label("No CVs yet", systemImage: "person.text.rectangle")
-                } description: {
-                    Text("Create a CV and keep different versions of it, e.g. one per kind of job.")
-                } actions: {
+                BrandEmptyState(
+                    title: "No CVs yet",
+                    message: "Create a CV and keep different versions of it, e.g. one per kind of job.",
+                    systemImage: "person.text.rectangle.fill"
+                ) {
                     Button("New CV") { nameSheet = .newCV }
+                        .buttonStyle(.borderedProminent)
                 }
+                .background(.background)
             }
         }
         .toolbar { toolbarContent }
@@ -199,12 +201,20 @@ private struct CVHeader: View {
 
     var body: some View {
         let count = cv.versions?.count ?? 0
-        HStack {
+        HStack(spacing: 8) {
+            IconTile(systemImage: "person.text.rectangle.fill", size: 22)
             Text(cv.name)
+                .font(.headline)
+                .foregroundStyle(.primary)
             Spacer()
             Text(count == 1 ? "1 version" : "\(count) versions")
-                .foregroundStyle(.secondary)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(Color.accentColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(Color.accentColor.opacity(0.12), in: Capsule())
         }
+        .padding(.vertical, 4)
     }
 }
 
@@ -212,16 +222,22 @@ private struct CVVersionRow: View {
     let version: CVVersion
 
     var body: some View {
-        HStack {
+        HStack(spacing: 10) {
+            Image(systemName: version.hasDocument ? "doc.richtext.fill" : "doc")
+                .font(.system(size: 15))
+                .foregroundStyle(version.hasDocument ? Color.accentColor : Color.secondary)
+                .frame(width: 22)
             VStack(alignment: .leading, spacing: 2) {
                 Text(version.label)
+                    .fontWeight(.medium)
                 Text("Edited \(version.updatedAt, format: .relative(presentation: .named))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
             if let fileName = version.htmlFileName {
-                Label(fileName, systemImage: "doc.richtext")
+                Text(fileName)
+                    .font(.callout)
                     .foregroundStyle(.secondary)
             } else {
                 Text("No document")
@@ -234,10 +250,12 @@ private struct CVVersionRow: View {
 
 #if DEBUG
 #Preview {
-    NavigationStack {
+    NavigationSplitView {
+        List { Label("CVs", systemImage: "person.text.rectangle") }
+    } detail: {
         CVLibraryView()
     }
     .modelContainer(PreviewData.container)
-    .frame(width: 700, height: 400)
+    .frame(width: 900, height: 400)
 }
 #endif
