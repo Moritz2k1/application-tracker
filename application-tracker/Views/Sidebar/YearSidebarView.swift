@@ -44,9 +44,9 @@ private struct SidebarHeader: View {
                 .shadow(color: .brandDeep.opacity(0.25), radius: 4, y: 2)
 
             VStack(alignment: .leading, spacing: 0) {
-                Text("Application")
+                Text("Paperplane")
                     .font(.headline)
-                Text("Tracker")
+                Text("Application Tracker")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(LinearGradient.brand)
             }
