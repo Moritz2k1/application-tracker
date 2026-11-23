@@ -72,6 +72,23 @@ const htmlLinter = linter(
   { delay: 300 }
 );
 
+function countCharacters(text, end) {
+  let count = 0;
+  for (let index = 0; index < end; index++) {
+    if (!/\s/.test(text[index])) count++;
+  }
+  return count;
+}
+
+function positionAfterCharacters(text, count) {
+  let seen = 0;
+  for (let index = 0; index < text.length; index++) {
+    if (seen === count) return index;
+    if (!/\s/.test(text[index])) seen++;
+  }
+  return text.length;
+}
+
 async function formatDocument() {
   const code = view.state.doc.toString();
   try {
@@ -83,12 +100,26 @@ async function formatDocument() {
       htmlWhitespaceSensitivity: "css"
     });
     post({ type: "formatted" });
-    if (formatted === code) return;
+    if (formatted === code || view.state.doc.toString() !== code) return;
 
-    const head = Math.min(view.state.selection.main.head, formatted.length);
+    const head = view.state.selection.main.head;
+    const anchor = positionAfterCharacters(formatted, countCharacters(code, head));
+
+    const frame = view.scrollDOM.getBoundingClientRect();
+    const cursor = view.coordsAtPos(head);
+    const cursorOffset = cursor ? cursor.top - frame.top : -1;
+    const isCursorVisible = cursorOffset >= 0 && cursorOffset < frame.height;
+    const topPosition = view.posAtCoords({ x: frame.left + frame.width / 2, y: frame.top + 1 }) ?? 0;
+
+    const scrollTarget = isCursorVisible
+      ? anchor
+      : positionAfterCharacters(formatted, countCharacters(code, view.state.doc.lineAt(topPosition).from));
+    const scrollMargin = isCursorVisible ? cursorOffset : 0;
+
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: formatted },
-      selection: { anchor: head },
+      selection: { anchor },
+      effects: EditorView.scrollIntoView(scrollTarget, { y: "start", yMargin: scrollMargin }),
       userEvent: "format"
     });
   } catch (error) {
