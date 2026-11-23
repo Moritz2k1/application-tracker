@@ -22,14 +22,35 @@ struct HTMLPreviewView: NSViewRepresentable {
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
-        guard context.coordinator.lastLoadedHTML != html else { return }
-        context.coordinator.lastLoadedHTML = html
-        webView.loadHTMLString(html, baseURL: nil)
+        context.coordinator.load(html, in: webView)
     }
 
     @MainActor
     final class Coordinator: NSObject, WKNavigationDelegate {
-        var lastLoadedHTML: String?
+        private var lastLoadedHTML: String?
+        private var scrollYToRestore: Double = 0
+
+        func load(_ html: String, in webView: WKWebView) {
+            guard html != lastLoadedHTML else { return }
+            let isFirstLoad = lastLoadedHTML == nil
+            lastLoadedHTML = html
+
+            guard !isFirstLoad else {
+                webView.loadHTMLString(html, baseURL: nil)
+                return
+            }
+
+            webView.evaluateJavaScript("window.scrollY") { [weak self] result, _ in
+                self?.scrollYToRestore = (result as? Double) ?? 0
+                webView.loadHTMLString(html, baseURL: nil)
+            }
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard scrollYToRestore > 0 else { return }
+            webView.evaluateJavaScript("window.scrollTo(0, \(scrollYToRestore))")
+            scrollYToRestore = 0
+        }
 
         func webView(
             _ webView: WKWebView,
