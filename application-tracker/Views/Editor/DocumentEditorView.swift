@@ -49,6 +49,12 @@ struct DocumentEditorView<Document: EditableDocument>: View {
             previewHTML = newValue
         }
         .onDisappear(perform: commit)
+        .task {
+            for await _ in NotificationCenter.default.notifications(named: NSApplication.willTerminateNotification) {
+                commit()
+                try? modelContext.save()
+            }
+        }
     }
 
     private func commit() {
