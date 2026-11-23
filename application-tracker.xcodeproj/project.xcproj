@@ -17,7 +17,7 @@
       "kind": "group",
       "name": "Products",
       "children": [
-        { "path": "<PRODUCTS>/application-tracker.app", "id": "000000000000000000000120", "type": "wrapper.application", "index": false },
+        { "path": "<PRODUCTS>/Paperplane.app", "id": "000000000000000000000120", "type": "wrapper.application", "index": false },
       ],
     },
   ],
@@ -25,7 +25,7 @@
     {
       "name": "application-tracker",
       "id": "000000000000000100000000",
-      "product": "Products/application-tracker.app",
+      "product": "Products/Paperplane.app",
       "product-type": "application",
       "build-phases": [
         {
@@ -68,7 +68,7 @@
         "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
         "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
         "CODE_SIGN_STYLE": "Automatic",
-        "CURRENT_PROJECT_VERSION": "1",
+        "CURRENT_PROJECT_VERSION": "2",
         "DEVELOPMENT_TEAM": "T93Y7H8443",
         "ENABLE_APP_SANDBOX": "YES",
         "ENABLE_INCOMING_NETWORK_CONNECTIONS": "NO",
@@ -100,7 +100,7 @@
         "LD_RUNPATH_SEARCH_PATHS": "@executable_path/Frameworks",
         "LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]": "@executable_path/../Frameworks",
         "MACOSX_DEPLOYMENT_TARGET": "26.0",
-        "MARKETING_VERSION": "1.0",
+        "MARKETING_VERSION": "1.1",
         "PRODUCT_BUNDLE_IDENTIFIER": "com.moritz2k1.ApplicationTracker",
         "PRODUCT_MODULE_NAME": "application_tracker",
         "PRODUCT_NAME": "Paperplane",
