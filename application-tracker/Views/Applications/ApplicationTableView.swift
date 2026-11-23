@@ -1,9 +1,6 @@
 import SwiftUI
 import SwiftData
 
-import SwiftUI
-import SwiftData
-
 struct ApplicationTableView: View {
     let year: Int
 
@@ -31,10 +28,50 @@ struct ApplicationTableView: View {
     }
 
     var body: some View {
+        Group {
+            if applications.isEmpty {
+                BrandEmptyState(
+                    title: "No applications in \(String(year))",
+                    message: "Keep track of where you applied, attach your cover letter and follow every step until the offer.",
+                    systemImage: "paperplane.fill"
+                ) {
+                    Button("New Application") { formSheet = .add }
+                        .buttonStyle(.borderedProminent)
+                }
+            } else {
+                VStack(spacing: 0) {
+                    ApplicationSummaryView(applications: applications)
+                    Divider()
+                    table
+                }
+            }
+        }
+        .toolbar { toolbarContent }
+        .navigationTitle(String(year))
+        .navigationSubtitle(applications.count == 1 ? "1 application" : "\(applications.count) applications")
+        .sheet(item: $formSheet) { sheet in
+            switch sheet {
+            case .add:
+                ApplicationFormView(defaultYear: year)
+            case .edit(let application):
+                ApplicationFormView(application: application, defaultYear: year)
+            }
+        }
+    }
+
+    private var table: some View {
         Table(sortedApplications, selection: $selection, sortOrder: $sortOrder) {
-            TableColumn("Company", value: \.company)
+            TableColumn("Company", value: \.company) { application in
+                HStack(spacing: 8) {
+                    MonogramTile(text: application.company)
+                    Text(application.company)
+                        .fontWeight(.medium)
+                }
+            }
+            .width(min: 150, ideal: 200)
 
             TableColumn("Job Title", value: \.jobTitle)
+                .width(min: 140, ideal: 200)
 
             TableColumn("Date", value: \.appliedOn) { application in
                 Text(application.appliedOn, format: .dateTime.day().month().year())
@@ -48,7 +85,8 @@ struct ApplicationTableView: View {
 
             TableColumn("Document") { application in
                 if let fileName = application.htmlFileName {
-                    Label(fileName, systemImage: "doc.richtext")
+                    Label(fileName, systemImage: "doc.richtext.fill")
+                        .foregroundStyle(Color.accentColor)
                 } else {
                     Text("—").foregroundStyle(.secondary)
                 }
@@ -70,65 +108,46 @@ struct ApplicationTableView: View {
             }
         }
         .onDeleteCommand { delete(selection) }
-        .overlay {
-            if applications.isEmpty {
-                ContentUnavailableView {
-                    Label("No applications in \(String(year))", systemImage: "tray")
-                } description: {
-                    Text("Add your first one with the + button.")
-                } actions: {
-                    Button("New Application") { formSheet = .add }
-                }
-            }
-        }
-        .toolbar {
-            ToolbarItemGroup {
-                Button {
-                    formSheet = .add
-                } label: {
-                    Label("New Application", systemImage: "plus")
-                }
-                .keyboardShortcut("n", modifiers: .command)
-                .help("New Application (⌘N)")
+    }
 
-                Button {
-                    if let application = singleApplication(in: selection) {
-                        openDocument(of: application)
-                    }
-                } label: {
-                    Label("Open Document", systemImage: "doc.richtext")
-                }
-                .disabled(selection.count != 1)
-                .help("Open the document window (double-click a row)")
-
-                Button {
-                    if let application = singleApplication(in: selection) {
-                        formSheet = .edit(application)
-                    }
-                } label: {
-                    Label("Edit Details", systemImage: "pencil")
-                }
-                .disabled(selection.count != 1)
-                .help("Edit company, title, date and status")
-
-                Button(role: .destructive) {
-                    delete(selection)
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
-                .disabled(selection.isEmpty)
-                .help("Delete the selected applications (⌘Z to undo)")
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItemGroup {
+            Button {
+                formSheet = .add
+            } label: {
+                Label("New Application", systemImage: "plus")
             }
-        }
-        .navigationTitle(String(year))
-        .navigationSubtitle(applications.count == 1 ? "1 application" : "\(applications.count) applications")
-        .sheet(item: $formSheet) { sheet in
-            switch sheet {
-            case .add:
-                ApplicationFormView(defaultYear: year)
-            case .edit(let application):
-                ApplicationFormView(application: application, defaultYear: year)
+            .keyboardShortcut("n", modifiers: .command)
+            .help("New Application (⌘N)")
+
+            Button {
+                if let application = singleApplication(in: selection) {
+                    openDocument(of: application)
+                }
+            } label: {
+                Label("Open Document", systemImage: "doc.richtext")
             }
+            .disabled(selection.count != 1)
+            .help("Open the document window (double-click a row)")
+
+            Button {
+                if let application = singleApplication(in: selection) {
+                    formSheet = .edit(application)
+                }
+            } label: {
+                Label("Edit Details", systemImage: "pencil")
+            }
+            .disabled(selection.count != 1)
+            .help("Edit company, title, date and status")
+
+            Button(role: .destructive) {
+                delete(selection)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+            .disabled(selection.isEmpty)
+            .help("Delete the selected applications (⌘Z to undo)")
         }
     }
 
