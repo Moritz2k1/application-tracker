@@ -99,6 +99,7 @@ struct ApplicationFormView: View {
                 notes: notes
             )
             modelContext.insert(newApplication)
+            try? modelContext.save()
         }
         dismiss()
     }

@@ -145,6 +145,7 @@ struct ApplicationTableView: View {
     }
 
     private func openDocument(of application: JobApplication) {
+        try? modelContext.save()
         openWindow(id: WindowID.document, value: application.persistentModelID)
     }
 
