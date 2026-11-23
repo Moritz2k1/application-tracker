@@ -1,10 +1,3 @@
-//
-//  build.mjs
-//  application-tracker
-//
-//  Created by Moritz Gutschi on 23.11.26.
-//
-
 import { build } from "esbuild";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 

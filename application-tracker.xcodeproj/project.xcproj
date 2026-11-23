@@ -43,7 +43,6 @@
           ],
           "shell": "/bin/sh",
           "script": [
-            "# Type a script or drag a script file from your workspace to insert its path.",
             "export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"",
             "",
             "if ! command -v npm >/dev/null; then",

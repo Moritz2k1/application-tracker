@@ -1,10 +1,3 @@
-//
-//  main.js
-//  application-tracker
-//
-//  Created by Moritz Gutschi on 23.11.26.
-//
-
 import { EditorView, basicSetup } from "codemirror";
 import { EditorState, Compartment, Transaction, Prec } from "@codemirror/state";
 import { keymap } from "@codemirror/view";

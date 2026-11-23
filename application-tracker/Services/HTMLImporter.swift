@@ -1,10 +1,3 @@
-//
-//  HTMLImporter.swift
-//  application-tracker
-//
-//  Created by Moritz Gutschi on 23.11.26.
-//
-
 import Foundation
 
 enum HTMLImporter {
