@@ -51,7 +51,7 @@ struct ApplicationFormView: View {
                 }
 
                 Section {
-                    DatePicker("Applied on", selection: $appliedOn, displayedComponents: .date)
+                    AppliedDatePicker(date: $appliedOn)
                     Picker("Status", selection: $status) {
                         ForEach(ApplicationStatus.allCases) { status in
                             Label(status.label, systemImage: status.systemImage)
@@ -81,7 +81,7 @@ struct ApplicationFormView: View {
             }
             .padding()
         }
-        .frame(width: 460, height: 480)
+        .frame(width: 460, height: 540)
     }
 
     private func save() {
