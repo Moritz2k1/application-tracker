@@ -7,8 +7,8 @@ struct ApplicationTrackerApp: App {
         WindowGroup {
             ContentView()
                 .frame(minWidth: 820, minHeight: 480)
+                .modelContainer(for: JobApplication.self, isUndoEnabled: true)
         }
-        // .modelContainer(for: JobApplication.self, isUndoEnabled: true)
         .commands {
             CommandGroup(replacing: .newItem) { }
         }
