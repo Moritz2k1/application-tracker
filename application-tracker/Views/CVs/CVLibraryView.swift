@@ -14,13 +14,7 @@ struct CVLibraryView: View {
         List(selection: $selection) {
             ForEach(cvs) { cv in
                 Section {
-                    let versions = cv.sortedVersions
-                    if versions.isEmpty {
-                        Text("No versions")
-                            .foregroundStyle(.secondary)
-                            .selectionDisabled()
-                    }
-                    ForEach(versions) { version in
+                    ForEach(cv.sortedVersions) { version in
                         CVVersionRow(version: version)
                             .tag(version.id)
                     }
@@ -30,6 +24,7 @@ struct CVLibraryView: View {
                 }
             }
         }
+        .environment(\.defaultMinListRowHeight, 52)
         .contextMenu(forSelectionType: CVVersion.ID.self) { ids in
             if let version = version(in: ids) {
                 Button("Open") { open(version) }
@@ -244,7 +239,8 @@ private struct CVVersionRow: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
+        .frame(minHeight: 44)
     }
 }
 
