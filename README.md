@@ -2,6 +2,13 @@
 
 A macOS app to track your job applications and write the HTML cover letters and CVs you send with them.
 
+![Applications by year](docs/screenshots/applications.png)
+
+<p align="center">
+  <img src="docs/screenshots/cvs-dark.png" alt="CV library in dark mode" width="64%">
+  <img src="docs/screenshots/new-application.png" alt="Adding a new application" width="34%">
+</p>
+
 ## Features
 
 - **Applications by year:** company, job title, date, status and document in one table.
