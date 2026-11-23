@@ -1,19 +1,19 @@
 import SwiftUI
 import SwiftData
 
-struct DocumentEditorView: View {
-    let application: JobApplication
+struct DocumentEditorView<Document: EditableDocument>: View {
+    let document: Document
     let layout: EditorLayout
     let editor: EditorController
 
     @State private var draft: String
     @State private var previewHTML: String
 
-    init(application: JobApplication, layout: EditorLayout, editor: EditorController) {
-        self.application = application
+    init(document: Document, layout: EditorLayout, editor: EditorController) {
+        self.document = document
         self.layout = layout
         self.editor = editor
-        let html = application.htmlContent ?? ""
+        let html = document.htmlContent ?? ""
         _draft = State(initialValue: html)
         _previewHTML = State(initialValue: html)
     }
@@ -31,8 +31,8 @@ struct DocumentEditorView: View {
             if layout.showsPreview {
                 HTMLPreviewView(
                     html: previewHTML,
-                    assets: application.assetResolver,
-                    assetsVersion: application.assetsVersion
+                    assets: document.assetResolver,
+                    assetsVersion: document.assetsVersion
                 )
                     .frame(minWidth: 280, maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -42,7 +42,7 @@ struct DocumentEditorView: View {
             guard !Task.isCancelled else { return }
             commit()
         }
-        .onChange(of: application.htmlContent) { _, newValue in
+        .onChange(of: document.htmlContent) { _, newValue in
             guard let newValue, newValue != draft else { return }
             draft = newValue
             previewHTML = newValue
@@ -52,9 +52,9 @@ struct DocumentEditorView: View {
 
     private func commit() {
         previewHTML = draft
-        guard !application.isDeleted,
-              application.htmlContent != nil,
-              application.htmlContent != draft else { return }
-        application.updateContent(draft)
+        guard !document.isDeleted,
+              document.htmlContent != nil,
+              document.htmlContent != draft else { return }
+        document.updateContent(draft)
     }
 }

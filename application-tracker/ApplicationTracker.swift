@@ -30,7 +30,10 @@ struct ApplicationTrackerApp: App {
         WindowGroup("Document", id: WindowID.document, for: PersistentIdentifier.self) { $applicationID in
             Group {
                 if let applicationID {
-                    DocumentWindowView(applicationID: applicationID)
+                    DocumentWindowView<JobApplication>(
+                        documentID: applicationID,
+                        notFoundTitle: "Application not found"
+                    )
                 } else {
                     ContentUnavailableView("No application selected", systemImage: "doc")
                 }

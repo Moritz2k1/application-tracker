@@ -1,21 +1,24 @@
 import SwiftUI
 import SwiftData
 
-struct DocumentWindowView: View {
-    @Query private var matches: [JobApplication]
+struct DocumentWindowView<Document: EditableDocument>: View {
+    let notFoundTitle: LocalizedStringKey
 
-    init(applicationID: PersistentIdentifier) {
-        _matches = Query(filter: #Predicate<JobApplication> { application in
-            application.persistentModelID == applicationID
+    @Query private var matches: [Document]
+
+    init(documentID: PersistentIdentifier, notFoundTitle: LocalizedStringKey) {
+        self.notFoundTitle = notFoundTitle
+        _matches = Query(filter: #Predicate<Document> { document in
+            document.persistentModelID == documentID
         })
     }
 
     var body: some View {
-        if let application = matches.first {
-            DocumentView(application: application)
+        if let document = matches.first {
+            DocumentView(document: document)
         } else {
             ContentUnavailableView(
-                "Application not found",
+                notFoundTitle,
                 systemImage: "questionmark.folder",
                 description: Text("It may have been deleted.")
             )
