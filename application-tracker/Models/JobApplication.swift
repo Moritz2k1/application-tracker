@@ -57,3 +57,17 @@ extension JobApplication {
         htmlContent != nil
     }
 }
+
+extension JobApplication {
+    func attachDocument(content: String, fileName: String) {
+        htmlContent = content
+        htmlFileName = fileName
+        updatedAt = .now
+    }
+
+    func removeDocument() {
+        htmlContent = nil
+        htmlFileName = nil
+        updatedAt = .now
+    }
+}

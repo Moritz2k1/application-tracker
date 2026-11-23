@@ -9,6 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.undoManager) private var undoManager
+
     @Query private var allApplications: [JobApplication]
     @State private var selectedYear: Int? = Calendar.current.currentYear
 
@@ -24,6 +27,9 @@ struct ContentView: View {
             } else {
                 ContentUnavailableView("Select a year", systemImage: "calendar")
             }
+        }
+        .onChange(of: undoManager, initial: true) {
+            modelContext.undoManager = undoManager
         }
     }
 

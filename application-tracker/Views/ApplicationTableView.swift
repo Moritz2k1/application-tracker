@@ -8,10 +8,14 @@
 import SwiftUI
 import SwiftData
 
+import SwiftUI
+import SwiftData
+
 struct ApplicationTableView: View {
     let year: Int
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.openWindow) private var openWindow
     @Query private var applications: [JobApplication]
 
     @State private var selection = Set<JobApplication.ID>()
@@ -60,15 +64,16 @@ struct ApplicationTableView: View {
         }
         .contextMenu(forSelectionType: JobApplication.ID.self) { ids in
             if let application = singleApplication(in: ids) {
-                Button("Edit…") { formSheet = .edit(application) }
+                Button("Open Document") { openDocument(of: application) }
+                Button("Edit Details…") { formSheet = .edit(application) }
+                Divider()
             }
             if !ids.isEmpty {
                 Button("Delete", role: .destructive) { delete(ids) }
             }
         } primaryAction: { ids in
-            // Double-click / Return opens the edit sheet.
             if let application = singleApplication(in: ids) {
-                formSheet = .edit(application)
+                openDocument(of: application)
             }
         }
         .onDeleteCommand { delete(selection) }
@@ -95,13 +100,23 @@ struct ApplicationTableView: View {
 
                 Button {
                     if let application = singleApplication(in: selection) {
+                        openDocument(of: application)
+                    }
+                } label: {
+                    Label("Open Document", systemImage: "doc.richtext")
+                }
+                .disabled(selection.count != 1)
+                .help("Open the document window (double-click a row)")
+
+                Button {
+                    if let application = singleApplication(in: selection) {
                         formSheet = .edit(application)
                     }
                 } label: {
-                    Label("Edit", systemImage: "pencil")
+                    Label("Edit Details", systemImage: "pencil")
                 }
                 .disabled(selection.count != 1)
-                .help("Edit the selected application")
+                .help("Edit company, title, date and status")
 
                 Button(role: .destructive) {
                     delete(selection)
@@ -127,6 +142,10 @@ struct ApplicationTableView: View {
     private func singleApplication(in ids: Set<JobApplication.ID>) -> JobApplication? {
         guard ids.count == 1, let id = ids.first else { return nil }
         return applications.first { $0.id == id }
+    }
+
+    private func openDocument(of application: JobApplication) {
+        openWindow(id: WindowID.document, value: application.persistentModelID)
     }
 
     private func delete(_ ids: Set<JobApplication.ID>) {
