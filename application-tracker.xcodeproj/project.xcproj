@@ -11,7 +11,7 @@
     ],
   },
   "files": [
-    { "kind": "folder", "path": "editor-web", "target-membership": [ "application-tracker" ] },
+    { "kind": "folder", "path": "editor-web" },
     { "kind": "folder", "path": "application-tracker", "target-membership": [ "application-tracker" ] },
     {
       "kind": "group",
