@@ -123,17 +123,22 @@ const view = new EditorView({
       lintGutter(),
       htmlLinter,
       themeCompartment.of(themeFor(darkQuery.matches)),
-      Prec.high(
-        keymap.of([
-          indentWithTab,
-          {
-            key: "Shift-Alt-f",
-            run: () => {
-              formatDocument();
-              return true;
-            }
+      Prec.high(keymap.of([indentWithTab])),
+      Prec.highest(
+        EditorView.domEventHandlers({
+          keydown(event) {
+            const isFormatShortcut =
+              event.code === "KeyF" &&
+              event.altKey &&
+              event.shiftKey &&
+              !event.metaKey &&
+              !event.ctrlKey;
+            if (!isFormatShortcut) return false;
+            event.preventDefault();
+            formatDocument();
+            return true;
           }
-        ])
+        })
       ),
       EditorView.updateListener.of((update) => {
         if (update.docChanged && !isApplyingExternalChange) {
