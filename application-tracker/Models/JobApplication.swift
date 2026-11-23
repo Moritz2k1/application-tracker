@@ -70,4 +70,9 @@ extension JobApplication {
         htmlFileName = nil
         updatedAt = .now
     }
+    
+    func updateContent(_ content: String) {
+        htmlContent = content
+        updatedAt = .now
+    }
 }
