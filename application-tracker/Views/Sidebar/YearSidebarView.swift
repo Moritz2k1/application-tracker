@@ -13,7 +13,7 @@ struct YearSidebarView: View {
 
     var body: some View {
         List(selection: $selection) {
-            Section("Years") {
+            Section("Applications") {
                 ForEach(years, id: \.self) { year in
                     Label(String(year), systemImage: "calendar")
                         .badge(counts[year] ?? 0)
@@ -21,7 +21,7 @@ struct YearSidebarView: View {
                 }
             }
 
-            Section("Library") {
+            Section("Documents") {
                 Label("CVs", systemImage: "person.text.rectangle")
                     .badge(cvCount)
                     .tag(SidebarItem.cvs)
