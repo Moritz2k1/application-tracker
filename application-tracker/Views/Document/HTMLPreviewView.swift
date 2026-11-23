@@ -3,39 +3,52 @@ import WebKit
 
 struct HTMLPreviewView: NSViewRepresentable {
     let html: String
+    let assets: AssetResolver
+    let assetsVersion: String
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(assets: assets)
     }
 
     func makeNSView(context: Context) -> WKWebView {
-        let webView = WKWebView()
+        let configuration = WKWebViewConfiguration()
+        configuration.setURLSchemeHandler(context.coordinator.schemeHandler, forURLScheme: AssetSchemeHandler.scheme)
+
+        let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         return webView
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
-        context.coordinator.load(html, in: webView)
+        context.coordinator.schemeHandler.resolve = assets
+        context.coordinator.load(html, assetsVersion: assetsVersion, in: webView)
     }
 
     @MainActor
     final class Coordinator: NSObject, WKNavigationDelegate {
+        let schemeHandler: AssetSchemeHandler
         private var lastLoadedHTML: String?
+        private var lastAssetsVersion: String?
         private var scrollYToRestore: Double = 0
 
-        func load(_ html: String, in webView: WKWebView) {
-            guard html != lastLoadedHTML else { return }
+        init(assets: @escaping AssetResolver) {
+            schemeHandler = AssetSchemeHandler(resolve: assets)
+        }
+
+        func load(_ html: String, assetsVersion: String, in webView: WKWebView) {
+            guard html != lastLoadedHTML || assetsVersion != lastAssetsVersion else { return }
             let isFirstLoad = lastLoadedHTML == nil
             lastLoadedHTML = html
+            lastAssetsVersion = assetsVersion
 
             guard !isFirstLoad else {
-                webView.loadHTMLString(html, baseURL: nil)
+                webView.loadHTMLString(html, baseURL: AssetSchemeHandler.baseURL)
                 return
             }
 
             webView.evaluateJavaScript("window.scrollY") { [weak self] result, _ in
                 self?.scrollYToRestore = (result as? Double) ?? 0
-                webView.loadHTMLString(html, baseURL: nil)
+                webView.loadHTMLString(html, baseURL: AssetSchemeHandler.baseURL)
             }
         }
 
@@ -56,6 +69,10 @@ struct HTMLPreviewView: NSViewRepresentable {
             }
             if url.scheme == "about" {
                 return .allow
+            }
+            if url.scheme == AssetSchemeHandler.scheme {
+                let isLinkToOtherPage = navigationAction.navigationType == .linkActivated && url.fragment == nil
+                return isLinkToOtherPage ? .cancel : .allow
             }
             if navigationAction.navigationType == .linkActivated {
                 NSWorkspace.shared.open(url)

@@ -19,12 +19,16 @@ final class PDFExporter: NSObject, WKNavigationDelegate {
 
     private let webView: WKWebView
     private let window: NSWindow
+    private let schemeHandler: AssetSchemeHandler
     private var loadContinuation: CheckedContinuation<Void, Error>?
     private var printContinuation: CheckedContinuation<Bool, Never>?
 
-    override init() {
+    init(assets: @escaping AssetResolver) {
+        schemeHandler = AssetSchemeHandler(resolve: assets)
+
         let configuration = WKWebViewConfiguration()
         configuration.preferences.shouldPrintBackgrounds = true
+        configuration.setURLSchemeHandler(schemeHandler, forURLScheme: AssetSchemeHandler.scheme)
 
         let frame = NSRect(origin: .zero, size: Self.a4)
         webView = WKWebView(frame: frame, configuration: configuration)
@@ -46,7 +50,7 @@ final class PDFExporter: NSObject, WKNavigationDelegate {
     private func load(_ html: String) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             loadContinuation = continuation
-            webView.loadHTMLString(html, baseURL: nil)
+            webView.loadHTMLString(html, baseURL: AssetSchemeHandler.baseURL)
         }
     }
 

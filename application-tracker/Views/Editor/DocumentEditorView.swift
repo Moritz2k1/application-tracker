@@ -29,7 +29,11 @@ struct DocumentEditorView: View {
                 .frame(minWidth: 320, maxWidth: .infinity, maxHeight: .infinity)
             }
             if layout.showsPreview {
-                HTMLPreviewView(html: previewHTML)
+                HTMLPreviewView(
+                    html: previewHTML,
+                    assets: application.assetResolver,
+                    assetsVersion: application.assetsVersion
+                )
                     .frame(minWidth: 280, maxWidth: .infinity, maxHeight: .infinity)
             }
         }

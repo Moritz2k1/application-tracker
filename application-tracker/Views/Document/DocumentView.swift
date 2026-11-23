@@ -6,7 +6,7 @@ struct DocumentView: View {
 
     @AppStorage("editorLayout") private var layout: EditorLayout = .split
     @State private var isConfirmingRemove = false
-    @State private var pendingDocument: HTMLImporter.ImportedDocument?
+    @State private var pendingImport: HTMLImporter.ImportResult?
     @State private var errorMessage: String?
     @State private var editor = EditorController()
     @State private var isExportingPDF = false
@@ -19,10 +19,10 @@ struct DocumentView: View {
             .confirmationDialog(
                 "Replace the current document?",
                 isPresented: isConfirmingReplace,
-                presenting: pendingDocument
+                presenting: pendingImport?.document
             ) { document in
                 Button("Replace with \(document.fileName)", role: .destructive) {
-                    application.attachDocument(content: document.content, fileName: document.fileName)
+                    if let pendingImport { apply(pendingImport) }
                 }
             } message: { _ in
                 Text("\(application.htmlFileName ?? "The current document") will be overwritten.")
@@ -30,7 +30,7 @@ struct DocumentView: View {
             .confirmationDialog("Remove the document?", isPresented: $isConfirmingRemove) {
                 Button("Remove", role: .destructive) { application.removeDocument() }
             } message: {
-                Text("The HTML is removed from the app. The original file on disk stays untouched.")
+                Text("The HTML and its images are removed from the app. The original files on disk stay untouched.")
             }
             .alert("Something went wrong", isPresented: hasError, presenting: errorMessage) { _ in
                 Button("OK") { }
@@ -47,14 +47,15 @@ struct DocumentView: View {
             ContentUnavailableView {
                 Label("No document yet", systemImage: "doc.badge.plus")
             } description: {
-                Text("Start from a blank template, import an HTML file, or drop one here.")
+                Text("Start from a blank template, import an HTML file with its images, or drop them here.")
             } actions: {
                 Button("New Document") { createBlankDocument() }
-                Button("Import HTML…") { importFile() }
+                Button("Import HTML…") { importFiles() }
             }
             .dropDestination(for: URL.self) { urls, _ in
-                guard let url = urls.first, HTMLImporter.isHTMLFile(url) else { return false }
-                handleImport(of: url)
+                let supported = urls.filter(HTMLImporter.isSupportedFile)
+                guard !supported.isEmpty else { return false }
+                handleImport(of: supported)
                 return true
             }
         }
@@ -85,12 +86,31 @@ struct DocumentView: View {
             .help("Format with Prettier (⇧⌥F in the editor)")
             
             Button {
-                importFile()
+                importFiles()
             } label: {
                 Label(application.hasDocument ? "Replace HTML…" : "Import HTML…",
                       systemImage: "square.and.arrow.down")
             }
-            .help("Import an HTML file")
+            .help("Import an HTML file together with its images")
+
+            Menu {
+                Button("Add Images…") { addImages() }
+                let assets = application.sortedAssets
+                if !assets.isEmpty {
+                    Section("Images") {
+                        ForEach(assets) { asset in
+                            Menu(asset.fileName) {
+                                Button("Copy <img> Tag") { copyImageTag(for: asset) }
+                                Button("Remove", role: .destructive) { application.removeAsset(asset) }
+                            }
+                        }
+                    }
+                }
+            } label: {
+                Label("Images", systemImage: "photo.on.rectangle")
+            }
+            .disabled(!application.hasDocument)
+            .help("Images used by the document, referenced by file name, e.g. <img src=\"photo.jpg\">")
 
             Button {
                 openInBrowser()
@@ -131,28 +151,57 @@ struct DocumentView: View {
         )
     }
 
-    private func importFile() {
-        guard let url = HTMLFilePicker.pickFile() else { return }
-        handleImport(of: url)
+    private func importFiles() {
+        let urls = HTMLFilePicker.pickFiles()
+        guard !urls.isEmpty else { return }
+        handleImport(of: urls)
     }
 
-    private func handleImport(of url: URL) {
+    private func addImages() {
+        let urls = HTMLFilePicker.pickImages()
+        guard !urls.isEmpty else { return }
+        handleImport(of: urls)
+    }
+
+    private func handleImport(of urls: [URL]) {
         do {
-            let document = try HTMLImporter.importDocument(from: url)
-            if application.hasDocument {
-                pendingDocument = document
+            let result = try HTMLImporter.importFiles(from: urls)
+            if result.document == nil, !application.hasDocument {
+                errorMessage = "Choose an HTML file to create the document. You can select its images together with it."
+            } else if result.document != nil, application.hasDocument {
+                pendingImport = result
             } else {
-                application.attachDocument(content: document.content, fileName: document.fileName)
+                apply(result)
             }
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
+    private func apply(_ result: HTMLImporter.ImportResult) {
+        if let document = result.document {
+            application.attachDocument(content: document.content, fileName: document.fileName)
+        }
+        for image in result.images {
+            application.addAsset(fileName: image.fileName, data: image.data)
+        }
+    }
+
+    private func copyImageTag(for asset: DocumentAsset) {
+        let name = URL(fileURLWithPath: asset.fileName).deletingPathExtension().lastPathComponent
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString("<img src=\"\(asset.fileName)\" alt=\"\(name)\">", forType: .string)
+    }
+
     private func openInBrowser() {
         guard let html = application.htmlContent else { return }
         do {
-            try BrowserPreview.open(html: html, fileName: application.htmlFileName ?? "preview.html")
+            try BrowserPreview.open(
+                html: html,
+                fileName: application.htmlFileName ?? "preview.html",
+                assets: application.assets ?? []
+            )
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -166,7 +215,7 @@ struct DocumentView: View {
         Task {
             defer { isExportingPDF = false }
             do {
-                let exporter = PDFExporter()
+                let exporter = PDFExporter(assets: application.assetResolver)
                 try await exporter.export(html: html, to: url)
                 NSWorkspace.shared.open(url)
             } catch {
@@ -181,8 +230,8 @@ struct DocumentView: View {
     }
 
     private var isConfirmingReplace: Binding<Bool> {
-        Binding(get: { pendingDocument != nil },
-                set: { if !$0 { pendingDocument = nil } })
+        Binding(get: { pendingImport?.document != nil },
+                set: { if !$0 { pendingImport = nil } })
     }
 
     private var hasError: Binding<Bool> {
