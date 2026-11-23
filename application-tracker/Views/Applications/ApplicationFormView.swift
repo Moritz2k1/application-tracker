@@ -30,13 +30,24 @@ struct ApplicationFormView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                IconTile(systemImage: isEditing ? "pencil" : "paperplane.fill", size: 36)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(isEditing ? "Edit Application" : "New Application")
+                        .font(.headline)
+                    Text(isEditing ? "Update the details of this application." : "Where did you apply?")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 18)
+
             Form {
                 Section {
                     TextField("Company", text: $company)
                     TextField("Job title", text: $jobTitle)
-                } header: {
-                    Text(isEditing ? "Edit Application" : "New Application")
-                        .font(.headline)
                 }
 
                 Section {
@@ -65,11 +76,12 @@ struct ApplicationFormView: View {
                     .keyboardShortcut(.cancelAction)
                 Button(isEditing ? "Save" : "Add") { save() }
                     .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent)
                     .disabled(!isValid)
             }
             .padding()
         }
-        .frame(width: 460, height: 440)
+        .frame(width: 460, height: 480)
     }
 
     private func save() {

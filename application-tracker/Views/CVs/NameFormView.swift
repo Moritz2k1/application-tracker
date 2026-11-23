@@ -30,8 +30,11 @@ struct NameFormView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(title)
-                .font(.headline)
+            HStack(spacing: 10) {
+                IconTile(systemImage: "person.text.rectangle.fill", size: 30)
+                Text(title)
+                    .font(.headline)
+            }
 
             TextField(placeholder, text: $name)
                 .textFieldStyle(.roundedBorder)
@@ -43,6 +46,7 @@ struct NameFormView: View {
                     .keyboardShortcut(.cancelAction)
                 Button(actionTitle, action: save)
                     .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent)
                     .disabled(trimmedName.isEmpty)
             }
         }

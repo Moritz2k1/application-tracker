@@ -4,8 +4,8 @@ extension ApplicationStatus {
     var color: Color {
         switch self {
         case .draft: .gray
-        case .applied: .blue
-        case .interview: .orange
+        case .applied: .accentColor
+        case .interview: .brandOrange
         case .offer: .green
         case .rejected: .red
         case .withdrawn: .secondary
@@ -18,11 +18,12 @@ struct StatusBadge: View {
 
     var body: some View {
         Label(status.label, systemImage: status.systemImage)
-            .font(.caption.weight(.medium))
+            .font(.caption.weight(.semibold))
             .foregroundStyle(status.color)
             .padding(.horizontal, 8)
-            .padding(.vertical, 2)
-            .background(status.color.opacity(0.15), in: Capsule())
+            .padding(.vertical, 3)
+            .background(status.color.opacity(0.14), in: Capsule())
+            .overlay(Capsule().strokeBorder(status.color.opacity(0.25), lineWidth: 0.5))
     }
 }
 

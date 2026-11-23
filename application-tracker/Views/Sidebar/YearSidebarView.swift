@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 enum SidebarItem: Hashable {
     case year(Int)
@@ -27,7 +28,33 @@ struct YearSidebarView: View {
                     .tag(SidebarItem.cvs)
             }
         }
-        .navigationSplitViewColumnWidth(min: 160, ideal: 180)
+        .safeAreaInset(edge: .top) {
+            SidebarHeader()
+        }
+        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+    }
+}
+
+private struct SidebarHeader: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 34, height: 34)
+                .shadow(color: .brandDeep.opacity(0.25), radius: 4, y: 2)
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Application")
+                    .font(.headline)
+                Text("Tracker")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(LinearGradient.brand)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
     }
 }
 
@@ -38,5 +65,5 @@ struct YearSidebarView: View {
         cvCount: 2,
         selection: .constant(.year(2026))
     )
-    .frame(width: 200, height: 300)
+    .frame(width: 220, height: 300)
 }
