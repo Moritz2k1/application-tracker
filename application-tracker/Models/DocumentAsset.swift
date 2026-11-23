@@ -9,6 +9,7 @@ final class DocumentAsset {
     var addedAt: Date
 
     var application: JobApplication?
+    var cvVersion: CVVersion?
 
     init(fileName: String, data: Data) {
         self.fileName = fileName

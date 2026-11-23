@@ -11,7 +11,9 @@ struct ApplicationTrackerApp: App {
 
     init() {
         do {
-            modelContainer = try ModelContainer(for: JobApplication.self, DocumentAsset.self)
+            modelContainer = try ModelContainer(
+                for: JobApplication.self, DocumentAsset.self, CurriculumVitae.self, CVVersion.self
+            )
         } catch {
             fatalError("Could not open the database: \(error)")
         }

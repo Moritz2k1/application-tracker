@@ -7,7 +7,7 @@ enum PreviewData {
     static let container: ModelContainer = {
         do {
             let container = try ModelContainer(
-                for: JobApplication.self, DocumentAsset.self,
+                for: JobApplication.self, DocumentAsset.self, CurriculumVitae.self, CVVersion.self,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true)
             )
             samples.forEach { container.mainContext.insert($0) }
